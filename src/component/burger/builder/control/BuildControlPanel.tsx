@@ -2,8 +2,20 @@ import React from 'react';
 import BuildControlPanelCSS from './BuildControlPanel.module.css';
 import BuildControl from "./BuildControl";
 import {IngredientType} from "../../../../IngredientType";
+import {Consumer, Runnable} from "../../../../util/functions";
 
-type BuildControlPanelProps = { price: number }
+type BuildControlPanelProps = {
+    price: number;
+    ingredients: Map<IngredientType, number>;
+    onOrder: Runnable
+    onReduce: Consumer<IngredientType>;
+    onAdd: Consumer<IngredientType>
+}
+
+function countIngredients(ingredients: Map<IngredientType, number>) {
+    return Array.from(ingredients.values()).reduce((s, c) => s + c, 0);
+}
+
 const BuildControlPanel: React.FC<BuildControlPanelProps> = (props) => {
 
     return (
@@ -14,10 +26,26 @@ const BuildControlPanel: React.FC<BuildControlPanelProps> = (props) => {
                 </p>
             </div>
 
-            <BuildControl ingredient={IngredientType.MEET}/>
-            <BuildControl ingredient={IngredientType.BACON}/>
-            <BuildControl ingredient={IngredientType.CHEESE}/>
-            <BuildControl ingredient={IngredientType.SALAD}/>
+            <BuildControl ingredient={IngredientType.MEET}
+                          count={props.ingredients.get(IngredientType.MEET)}
+                          onAdd={props.onAdd}
+                          onReduce={props.onReduce}/>
+            <BuildControl ingredient={IngredientType.BACON}
+                          count={props.ingredients.get(IngredientType.BACON)}
+                          onAdd={props.onAdd}
+                          onReduce={props.onReduce}/>
+            <BuildControl ingredient={IngredientType.CHEESE}
+                          count={props.ingredients.get(IngredientType.CHEESE)}
+                          onAdd={props.onAdd}
+                          onReduce={props.onReduce}/>
+            <BuildControl ingredient={IngredientType.SALAD}
+                          count={props.ingredients.get(IngredientType.SALAD)}
+                          onAdd={props.onAdd}
+                          onReduce={props.onReduce}/>
+
+            <button className={BuildControlPanelCSS.OrderButton}
+                    disabled={countIngredients(props.ingredients) <= 0}
+                    onClick={() => props.onOrder()}>Order Now</button>
         </div>
     )
 }

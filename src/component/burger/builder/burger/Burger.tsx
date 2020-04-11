@@ -4,7 +4,6 @@ import BurgerCSS from './Burger.module.css'
 import BottomBread from "./ingredient/BottomBread";
 import Ingredient from "./ingredient/Ingredient";
 import {IngredientType} from "../../../../IngredientType";
-import IngredientContext from "../IngredientContext";
 
 
 function convertIngredientsToNodes(ingredients: Map<IngredientType, number>) {
@@ -27,26 +26,16 @@ function convertIngredientsToNodes(ingredients: Map<IngredientType, number>) {
     return content;
 }
 
-// type BurgerProps = { ingredients: Map<IngredientType, number> }
-const Burger: React.FC = (props) => {
-
+type BurgerProps = { ingredients: Map<IngredientType, number> }
+const Burger: React.FC<BurgerProps> = (props) => {
 
     return (
-        <IngredientContext.Consumer>
-            {value => {
-                return (
-                    <div className={BurgerCSS.Burger}>
-                        <TopBread/>
-                        {convertIngredientsToNodes(value.ingredients)}
-                        <BottomBread/>
-                    </div>
-                )
-            }
-            }
-
-        </IngredientContext.Consumer>
-    )
-
+        <div className={BurgerCSS.Burger}>
+            <TopBread/>
+            {convertIngredientsToNodes(props.ingredients)}
+            <BottomBread/>
+        </div>
+    );
 }
 
 export default Burger;
