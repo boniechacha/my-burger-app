@@ -4,51 +4,119 @@ import {IngredientType} from "../../../IngredientType";
 import BuildControlPanel from "./control/BuildControlPanel";
 import Modal from "../../modal/Modal";
 import OrderSummary from "../../order/OrderSummary";
+import OrderAxios from "../../../service/order-axios";
+import LoadingComponent from "../../spinner/LoadingComponent";
+import ErrorWrapper from "../../error/ErrorWrapper";
 
 type BurgerBuilderProps = {};
-type BurgerBuilderState = { ingredients: Map<IngredientType, number>, price: number, purchasing: boolean };
+type BurgerBuilderState = {
+    ingredients: Map<IngredientType, number>,
+    price: number,
+    purchasing: boolean,
+    submittingOrder: boolean,
+    settingUp: boolean,
+    failed: boolean,
+    error: string
+};
 
-const BASE_PRICE = 3.0;
-const INGREDIENT_PRICE = new Map<IngredientType, number>();
-INGREDIENT_PRICE.set(IngredientType.MEET, 1.8);
-INGREDIENT_PRICE.set(IngredientType.BACON, 1.2);
-INGREDIENT_PRICE.set(IngredientType.CHEESE, 0.5);
-INGREDIENT_PRICE.set(IngredientType.SALAD, 0.4);
 
 class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderState> {
+    static BASE_PRICE: number;
+
+    static INGREDIENT_PRICE = new Map<IngredientType, number>();
 
     state: BurgerBuilderState = {
         ingredients: new Map<IngredientType, number>(),
-        price: BASE_PRICE,
-        purchasing: false
+        price: 0.0,
+        purchasing: false,
+        submittingOrder: false,
+        settingUp: true,
+        failed: false,
+        error: ''
     };
 
+    componentDidMount() {
+        OrderAxios.get("/price.json")
+            .then(response => {
+                    BurgerBuilder.BASE_PRICE = +response.data['BASE'];
+                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.MEET, +response.data[IngredientType.MEET.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.BACON, +response.data[IngredientType.BACON.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.CHEESE, +response.data[IngredientType.CHEESE.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.SALAD, +response.data[IngredientType.SALAD.toUpperCase()]);
+
+
+                    this.setState({price: BurgerBuilder.BASE_PRICE, settingUp: false})
+                }
+            )
+            .catch(error => {
+                this.setError(error.toString())
+                this.setState({failed: true})
+            })
+
+    }
+
     render() {
+
+        if (this.state.failed) return <h1>Sorry! Application failed to load.</h1>
         return (
-            <React.Fragment>
+            <ErrorWrapper error={this.state.error}>
 
-                <Modal show={this.state.purchasing}
-                       onClosed={() => this.purchasingHandler(false)}>
-                    <OrderSummary price={this.state.price}
-                                  ingredients={this.state.ingredients}
-                                  onCancel={()=> this.purchasingHandler(false)}
-                                  onProceed={() => this.processOrder()}/>
-                </Modal>
+                <LoadingComponent loading={this.state.settingUp}>
 
-                <Burger ingredients={this.state.ingredients}/>
+                    <Modal show={this.state.purchasing}
+                           onClosed={() => this.purchasingHandler(false)}>
 
-                <BuildControlPanel price={this.state.price}
-                                   ingredients={this.state.ingredients}
-                                   onOrder={() => this.purchasingHandler(true)}
-                                   onAdd={(t) => this.addIngredient(t)}
-                                   onReduce={(t) => this.reduceIngredient(t)}/>
+                        <LoadingComponent loading={this.state.submittingOrder}>
+                            <OrderSummary price={this.state.price}
+                                          ingredients={this.state.ingredients}
+                                          onCancel={() => this.purchasingHandler(false)}
+                                          onProceed={() => this.processOrder()}/>
+                        </LoadingComponent>
 
-            </React.Fragment>
+                    </Modal>
+
+                    <Burger ingredients={this.state.ingredients}/>
+
+                    <BuildControlPanel price={this.state.price}
+                                       ingredients={this.state.ingredients}
+                                       onOrder={() => this.purchasingHandler(true)}
+                                       onAdd={(t) => this.addIngredient(t)}
+                                       onReduce={(t) => this.reduceIngredient(t)}/>
+
+                </LoadingComponent>
+            </ErrorWrapper>
         )
     }
 
+
+    setError = (error: string) => {
+        this.setState({error: error})
+    }
+
+    submittingOrder = (submitting: boolean) => {
+        this.setState({submittingOrder: submitting})
+    }
+
     processOrder = () => {
-        alert("Order Sent!!")
+        this.setError('')
+        this.submittingOrder(true);
+
+        const order = {
+            ingredients: Object.fromEntries(this.state.ingredients),
+            price: this.state.price
+        };
+
+        OrderAxios.post("/order.json", order)
+            .then(response => {
+            })
+            .catch(error => {
+                this.setError(error.toString());
+                console.log("error :" + error)
+            })
+            .finally(() => {
+                this.submittingOrder(false);
+                this.purchasingHandler(false)
+            })
     }
 
     purchasingHandler = (purchasing: boolean) => {
@@ -98,12 +166,10 @@ class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderSta
     }
 
     static getIngredientUnitPrice(type: IngredientType) {
-        let price = INGREDIENT_PRICE.get(type);
+        let price = BurgerBuilder.INGREDIENT_PRICE.get(type);
         if (!price) price = 0.0;
         return price;
     }
-
-
 }
 
 export default BurgerBuilder;
