@@ -1,5 +1,5 @@
 import React from 'react';
-import {IngredientType} from "../../../../IngredientType";
+import {IngredientType} from "../../../../domain/IngredientType";
 import BuildControlCSS from './BuildControl.module.css';
 import {Consumer} from "../../../../util/functions";
 

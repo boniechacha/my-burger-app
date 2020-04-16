@@ -1,7 +1,7 @@
 import React from "react";
-import {IngredientType} from "../../IngredientType";
-import Button from "../button/Button";
-import {Runnable} from "../../util/functions";
+import {IngredientType} from "../../../domain/IngredientType";
+import Button from "../../util/button/Button";
+import {Runnable} from "../../../util/functions";
 
 type OrderSummaryProps = {
     price: number;
@@ -10,7 +10,7 @@ type OrderSummaryProps = {
     onProceed:Runnable
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = props => {
+const OrderCheckoutSummary: React.FC<OrderSummaryProps> = props => {
 
     let ingredientsLIElements = Array.from(props.ingredients.keys()).map((ingr) => {
         let count = props.ingredients.get(ingr);
@@ -27,7 +27,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = props => {
         <React.Fragment>
             <h3>Your Order</h3>
             <p>A delicious burger with the following ingredients</p>
-            <ul>
+            <ul style={{listStyle:"none"}}>
                 {ingredientsLIElements}
             </ul>
 
@@ -39,4 +39,4 @@ const OrderSummary: React.FC<OrderSummaryProps> = props => {
     )
 }
 
-export default OrderSummary;
+export default OrderCheckoutSummary;

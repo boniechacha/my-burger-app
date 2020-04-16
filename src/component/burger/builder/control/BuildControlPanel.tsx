@@ -1,7 +1,7 @@
 import React from 'react';
 import BuildControlPanelCSS from './BuildControlPanel.module.css';
 import BuildControl from "./BuildControl";
-import {IngredientType} from "../../../../IngredientType";
+import {BACON, CHEESE, IngredientType, MEAT, SALAD} from "../../../../domain/IngredientType";
 import {Consumer, Runnable} from "../../../../util/functions";
 
 type BuildControlPanelProps = {
@@ -26,20 +26,20 @@ const BuildControlPanel: React.FC<BuildControlPanelProps> = (props) => {
                 </p>
             </div>
 
-            <BuildControl ingredient={IngredientType.MEET}
-                          count={props.ingredients.get(IngredientType.MEET)}
+            <BuildControl ingredient={MEAT}
+                          count={props.ingredients.get(MEAT)}
                           onAdd={props.onAdd}
                           onReduce={props.onReduce}/>
-            <BuildControl ingredient={IngredientType.BACON}
-                          count={props.ingredients.get(IngredientType.BACON)}
+            <BuildControl ingredient={BACON}
+                          count={props.ingredients.get(BACON)}
                           onAdd={props.onAdd}
                           onReduce={props.onReduce}/>
-            <BuildControl ingredient={IngredientType.CHEESE}
-                          count={props.ingredients.get(IngredientType.CHEESE)}
+            <BuildControl ingredient={CHEESE}
+                          count={props.ingredients.get(CHEESE)}
                           onAdd={props.onAdd}
                           onReduce={props.onReduce}/>
-            <BuildControl ingredient={IngredientType.SALAD}
-                          count={props.ingredients.get(IngredientType.SALAD)}
+            <BuildControl ingredient={SALAD}
+                          count={props.ingredients.get(SALAD)}
                           onAdd={props.onAdd}
                           onReduce={props.onReduce}/>
 

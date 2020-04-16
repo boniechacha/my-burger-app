@@ -1,5 +1,5 @@
 import React from "react";
-import {Runnable} from "../../util/functions";
+import {Runnable} from "../../../util/functions";
 import CSS from './HamburgerButton.module.css'
 
 type HamburgerButtonProps = { onClicked: Runnable }

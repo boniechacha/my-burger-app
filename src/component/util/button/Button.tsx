@@ -1,13 +1,12 @@
-import React from "react";
-import {Runnable} from "../../util/functions";
+import React, {MouseEventHandler} from "react";
 import ButtonCSS from './Button.module.css'
 
-type ButtonProps = { type: 'Danger' | 'Success'; clicked: Runnable }
+type ButtonProps = { type: 'Danger' | 'Success'; clicked: MouseEventHandler }
 
 const Button: React.FC<ButtonProps> = (props) => {
     return (
         <button className={[ButtonCSS.Button, ButtonCSS[props.type]].join(' ')}
-                onClick={() => props.clicked()}>
+                onClick={(event) => props.clicked(event)}>
             {props.children}
         </button>
     )

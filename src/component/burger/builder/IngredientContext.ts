@@ -1,5 +1,5 @@
 import React from "react";
-import {IngredientType} from "../../../IngredientType";
+import {IngredientType} from "../../../domain/IngredientType";
 
 type IngredientContextType = { ingredients: Map<IngredientType, number>; onAdd: (type: IngredientType) => void; onReduce: (type: IngredientType) => void }
 

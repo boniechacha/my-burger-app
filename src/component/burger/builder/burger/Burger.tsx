@@ -3,7 +3,7 @@ import TopBread from "./ingredient/TopBread";
 import BurgerCSS from './Burger.module.css'
 import BottomBread from "./ingredient/BottomBread";
 import Ingredient from "./ingredient/Ingredient";
-import {IngredientType} from "../../../../IngredientType";
+import {IngredientType} from "../../../../domain/IngredientType";
 
 
 function convertIngredientsToNodes(ingredients: Map<IngredientType, number>) {

@@ -1,19 +1,21 @@
 import React from "react";
 import Burger from "./burger/Burger";
-import {IngredientType} from "../../../IngredientType";
+import {BACON, CHEESE, IngredientType, MEAT, SALAD} from "../../../domain/IngredientType";
 import BuildControlPanel from "./control/BuildControlPanel";
-import Modal from "../../modal/Modal";
-import OrderSummary from "../../order/OrderSummary";
+import Modal from "../../util/modal/Modal";
+import OrderCheckoutSummary from "../../checkout/order/OrderCheckoutSummary";
 import OrderAxios from "../../../service/order-axios";
-import LoadingComponent from "../../spinner/LoadingComponent";
-import ErrorWrapper from "../../error/ErrorWrapper";
+import LoadingComponent from "../../util/spinner/LoadingComponent";
+import ErrorWrapper from "../../util/error/ErrorWrapper";
+import {RouteComponentProps} from "react-router";
+import {convertMapToQuery} from "../../../util/functions";
 
-type BurgerBuilderProps = {};
+interface BurgerBuilderProps extends RouteComponentProps {
+};
 type BurgerBuilderState = {
     ingredients: Map<IngredientType, number>,
     price: number,
     purchasing: boolean,
-    submittingOrder: boolean,
     settingUp: boolean,
     failed: boolean,
     error: string
@@ -29,7 +31,6 @@ class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderSta
         ingredients: new Map<IngredientType, number>(),
         price: 0.0,
         purchasing: false,
-        submittingOrder: false,
         settingUp: true,
         failed: false,
         error: ''
@@ -39,10 +40,10 @@ class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderSta
         OrderAxios.get("/price.json")
             .then(response => {
                     BurgerBuilder.BASE_PRICE = +response.data['BASE'];
-                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.MEET, +response.data[IngredientType.MEET.toUpperCase()]);
-                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.BACON, +response.data[IngredientType.BACON.toUpperCase()]);
-                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.CHEESE, +response.data[IngredientType.CHEESE.toUpperCase()]);
-                    BurgerBuilder.INGREDIENT_PRICE.set(IngredientType.SALAD, +response.data[IngredientType.SALAD.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(MEAT, +response.data[MEAT.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(BACON, +response.data[BACON.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(CHEESE, +response.data[CHEESE.toUpperCase()]);
+                    BurgerBuilder.INGREDIENT_PRICE.set(SALAD, +response.data[SALAD.toUpperCase()]);
 
 
                     this.setState({price: BurgerBuilder.BASE_PRICE, settingUp: false})
@@ -64,14 +65,12 @@ class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderSta
                 <LoadingComponent loading={this.state.settingUp}>
 
                     <Modal show={this.state.purchasing}
-                           onClosed={() => this.purchasingHandler(false)}>
+                           onClosed={() => this.orderCancel()}>
 
-                        <LoadingComponent loading={this.state.submittingOrder}>
-                            <OrderSummary price={this.state.price}
-                                          ingredients={this.state.ingredients}
-                                          onCancel={() => this.purchasingHandler(false)}
-                                          onProceed={() => this.processOrder()}/>
-                        </LoadingComponent>
+                        <OrderCheckoutSummary price={this.state.price}
+                                              ingredients={this.state.ingredients}
+                                              onCancel={() => this.orderCancel()}
+                                              onProceed={() => this.orderCheckout()}/>
 
                     </Modal>
 
@@ -79,11 +78,12 @@ class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderSta
 
                     <BuildControlPanel price={this.state.price}
                                        ingredients={this.state.ingredients}
-                                       onOrder={() => this.purchasingHandler(true)}
+                                       onOrder={() => this.showOrderSummary()}
                                        onAdd={(t) => this.addIngredient(t)}
                                        onReduce={(t) => this.reduceIngredient(t)}/>
 
                 </LoadingComponent>
+
             </ErrorWrapper>
         )
     }
@@ -93,36 +93,35 @@ class BurgerBuilder extends React.Component<BurgerBuilderProps, BurgerBuilderSta
         this.setState({error: error})
     }
 
-    submittingOrder = (submitting: boolean) => {
-        this.setState({submittingOrder: submitting})
-    }
-
-    processOrder = () => {
-        this.setError('')
-        this.submittingOrder(true);
-
-        const order = {
-            ingredients: Object.fromEntries(this.state.ingredients),
-            price: this.state.price
-        };
-
-        OrderAxios.post("/order.json", order)
-            .then(response => {
-            })
-            .catch(error => {
-                this.setError(error.toString());
-                console.log("error :" + error)
-            })
-            .finally(() => {
-                this.submittingOrder(false);
-                this.purchasingHandler(false)
-            })
-    }
-
-    purchasingHandler = (purchasing: boolean) => {
+    showOrderSummary = () => {
         this.setState({
-            purchasing: purchasing
+            purchasing: true
         })
+    }
+
+    orderCheckout = () => {
+
+        this.props.history.push({
+            pathname: '/checkout',
+            search:this.convertIngredientsToQuery()
+        });
+    }
+
+    orderCancel = () => {
+        this.setState({
+            purchasing: false
+        })
+    }
+
+    convertIngredientsToQuery = () => {
+        const queryMap = new Map<string,string>().set('price',this.state.price.toFixed(2).toString());
+        this.state.ingredients.forEach((value, key) => queryMap.set(key.toString(),value.toString()))
+
+        return convertMapToQuery(queryMap);
+
+        // return Array.from(this.state.ingredients.keys())
+        //     .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(this.state.ingredients.get(key)!)}`)
+        //     .join('&')
     }
 
     addIngredient = (type: IngredientType) => {

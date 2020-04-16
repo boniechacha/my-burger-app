@@ -1,0 +1,17 @@
+.Order{
+    margin: 5px;
+    box-shadow: 1px 2px 3px #ccc;
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    display: inline-block;
+}
+
+.Order .Ingredient{
+    box-shadow: 1px 2px 3px #ccc;
+    background: #40A4C8;
+    color: white;
+    padding: 10px;
+    margin: 3px;
+    display: inline-block;
+}

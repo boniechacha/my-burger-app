@@ -1,7 +1,7 @@
 import React from "react";
 import ModalCSS from './Modal.module.css';
 import Backdrop from "../backdrop/Backdrop";
-import {Runnable} from "../../util/functions";
+import {Runnable} from "../../../util/functions";
 
 type ModalProps = { show: boolean,onClosed:Runnable};
 

@@ -1,12 +1,13 @@
 import React from "react";
-import NavigationCSS from './Navigation.module.css'
+import CSS from './Navigation.module.css';
 import NavigationItem from "./item/NavigationItem";
+
 const Navigation: React.FC = props => {
     return (
-        <nav className={NavigationCSS.Navigation}>
+        <nav className={CSS.Navigation}>
             <ul>
-                <NavigationItem link={'/'} active={false}>Build</NavigationItem>
-                <NavigationItem link={'/'} active={false}>Checkout</NavigationItem>
+                <NavigationItem link={'/'} exact>Build</NavigationItem>
+                <NavigationItem link={'/orders'}>Orders</NavigationItem>
             </ul>
         </nav>
     )

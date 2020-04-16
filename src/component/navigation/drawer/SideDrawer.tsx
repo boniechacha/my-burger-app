@@ -2,7 +2,7 @@ import React from "react";
 import Logo from "../logo/Logo";
 import Navigation from "../navigation/Navigation";
 import CSS from './SideDrawer.module.css'
-import Backdrop from "../../backdrop/Backdrop";
+import Backdrop from "../../util/backdrop/Backdrop";
 
 type SideDrawerState = {}
 type SideDrawerProps = { open: boolean }
