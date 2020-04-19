@@ -1,8 +1,8 @@
 import React from 'react';
 import LayoutCSS from './Layout.module.css';
-import Toolbar from "../../navigation/toolbar/Toolbar";
-import SideDrawer from "../../navigation/drawer/SideDrawer";
-import HamburgerButton from "../button/HamburgerButton";
+import Toolbar from "../navigation/toolbar/Toolbar";
+import SideDrawer from "../navigation/drawer/SideDrawer";
+import HamburgerButton from "../util/button/HamburgerButton";
 
 type LayoutState = { drawerOpen: boolean }
 type LayoutProps = {}

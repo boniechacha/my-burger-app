@@ -9,7 +9,8 @@
 }
 
 .AddressForm form{
-    display:inline-block;
+    display:block;
+    width: 100%;
 }
 .AddressForm input {
     display: block;

@@ -30,7 +30,7 @@ class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState> {
                         <Logo/>
                     </div>
 
-                    <Navigation/>
+                    <Navigation onNavigating={l=>this.closeSideDrawer()}/>
                 </div>
             </React.Fragment>
         )

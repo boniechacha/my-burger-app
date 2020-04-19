@@ -10,7 +10,7 @@ const Toolbar: React.FC = (props) => {
                 <Logo/>
             </div>
 
-            <Navigation/>
+            <Navigation onNavigating={(e)=>{}}/>
         </header>
     )
 }
