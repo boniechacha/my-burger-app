@@ -8,7 +8,7 @@ const OrderComponent: React.FC<OrderProps> = props => {
     return (
         <div className={CSS.Order}>
             <p>{Object.keys(props.order.ingredients).map(ing => {
-                    return <span className={CSS.Ingredient}>{ing} [<b>{props.order.ingredients[ing]}</b>]</span>
+                    return <span key={ing} className={CSS.Ingredient}>{ing} [<b>{props.order.ingredients[ing]}</b>]</span>
                 }
             )}
             </p>

@@ -12,8 +12,9 @@
 //     }
 // }
 
-export type IngredientType = 'Cheese' |'Meat'|'Salad'|'Bacon';
 export const CHEESE = 'Cheese'
 export const MEAT = 'Meat'
 export const SALAD = 'Salad'
 export const BACON = 'Bacon'
+
+export type IngredientType = typeof CHEESE | typeof MEAT | typeof SALAD | typeof BACON;

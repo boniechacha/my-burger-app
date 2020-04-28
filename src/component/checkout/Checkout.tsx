@@ -3,31 +3,17 @@ import OrderCheckoutPreview from "./order/OrderCheckoutPreview";
 import {IngredientType} from "../../domain/IngredientType";
 import {Route, RouteComponentProps} from "react-router";
 import AddressForm from "./address/AddressForm";
+import {RootState} from "../state/reducer";
+import {connect} from "react-redux";
 
-interface CheckoutProps extends RouteComponentProps {
-}
+interface CheckoutProps extends RouteComponentProps,MapStateProps {}
 
-type CheckoutState = { ingredients: Map<IngredientType, number> }
-
-class Checkout extends React.Component<CheckoutProps, CheckoutState> {
-
-    state = {
-        ingredients: new Map()
-    }
-
-    componentDidMount() {
-        const ingredients = new Map<IngredientType, number>();
-        new URLSearchParams(this.props.location.search).forEach((value, key) => {
-            if(key !=='price') ingredients.set(key as IngredientType, +value)
-        })
-
-        this.setState({ingredients: ingredients})
-    }
+class Checkout extends React.Component<CheckoutProps> {
 
     render() {
         return (
             <div>
-                <OrderCheckoutPreview ingredients={this.state.ingredients}
+                <OrderCheckoutPreview ingredients={this.props.ingredients}
                                       cancel={() => this.props.history.goBack()}
                                       proceed={() => this.proceed()}/>
                 <Route path={this.props.match.path + '/address'} component={AddressForm}/>
@@ -36,11 +22,17 @@ class Checkout extends React.Component<CheckoutProps, CheckoutState> {
     }
 
     private proceed() {
-        this.props.history.push({
-            pathname:"/checkout/address",
-            search:this.props.location.search
-        })
+        this.props.history.push("/checkout/address")
     }
 }
 
-export default Checkout;
+
+interface MapStateProps{ ingredients: Map<IngredientType, number> }
+
+const mapStateToProps = (state: RootState): MapStateProps=> {
+    return {
+        ingredients: state.builder.ingredients
+    };
+}
+
+export default connect(mapStateToProps)(Checkout);

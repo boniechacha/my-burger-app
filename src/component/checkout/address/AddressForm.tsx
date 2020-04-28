@@ -1,30 +1,25 @@
 import React from "react";
 import Button from "../../util/button/Button";
 import CSS from './AddressForm.module.css'
-import {RouteComponentProps} from "react-router";
 import Modal from "../../util/modal/Modal";
 import LoadingComponent from "../../util/spinner/LoadingComponent";
-import OrderAxios from "../../../service/order-axios";
-import {convertQueryToMap} from "../../../util/functions";
 import TextField from "../../util/textfield/TextField";
-
-type Validation = { required?: boolean, minLength?: number, maxLength?: number }
-type Form = {
-    [p: string]: {
-        value: string,
-        valid: boolean,
-        changed: boolean,
-        validation: Validation
-    }
-};
-type AddressFormState = { submitting: boolean, sending: boolean, valid: boolean, error: string, form: Form }
-interface AddressFormProps extends RouteComponentProps {}
+import {connect} from "react-redux";
+import {RootState} from "../../state/reducer";
+import Form from "./Form";
+import Validation from "./Validation";
+import {
+    AddressFormProps,
+    AddressFormReduxDispatchProps,
+    AddressFormReduxStateProps,
+    AddressFormState
+} from "./AddressFormTypes";
+import {submitOrder} from "../../state/order/OrderAction";
+import {OrderData} from "../../../domain/OrderData";
 
 class AddressForm extends React.Component<AddressFormProps, AddressFormState> {
     state = {
         submitting: false,
-        sending: false,
-        error: '',
         valid: false,
         form: {
             name: {
@@ -56,22 +51,11 @@ class AddressForm extends React.Component<AddressFormProps, AddressFormState> {
 
     submitHandler(event: React.MouseEvent<Element>) {
         event.preventDefault();
-        this.setState({error: '', submitting: true, sending: true});
+        this.setState({submitting: true});
 
-        const queryMap = convertQueryToMap(this.props.location.search);
-
-        const price = +queryMap.get('price')!;
-        queryMap.delete('price');
-
-        const ingredients = Object.fromEntries(queryMap.entries())
-        const ingredientData = Object.keys(ingredients).reduce((prev, cur) => {
-            prev.set(cur, +queryMap.get(cur)!);
-            return prev;
-        }, new Map<string, number>());
-
-        const order = {
-            price: price,
-            ingredients: Object.fromEntries(ingredientData.entries()),
+        const order:OrderData = {
+            price: this.props.price,
+            ingredients: Object.fromEntries(this.props.ingredients.entries()),
             customer: {
                 name: this.state.form.name.value,
                 email: this.state.form.email.value,
@@ -79,17 +63,7 @@ class AddressForm extends React.Component<AddressFormProps, AddressFormState> {
             }
         }
 
-        console.log(order)
-
-        OrderAxios.post("/order.json", order)
-            .then(response => {
-                this.setState({error: '', sending: false});
-            })
-            .catch(error => {
-                this.setState({error: error.toString(), sending: false});
-            })
-            .finally(() => {
-            })
+        this.props.submitOrder(order);
 
     }
 
@@ -117,14 +91,14 @@ class AddressForm extends React.Component<AddressFormProps, AddressFormState> {
 
     render() {
 
-        const submissionMsg = this.state.error === '' ? 'Submitted Successfully' : this.state.error
+        const submissionMsg = this.props.orderSubmissionError === '' ? 'Submitted Successfully' : this.props.orderSubmissionError
 
         return (
             <React.Fragment>
                 <Modal show={this.state.submitting}
                        onClosed={() => this.modalClosed()}>
 
-                    <LoadingComponent loading={this.state.sending}>
+                    <LoadingComponent loading={this.props.submittingOrder}>
                         <p>{submissionMsg}</p>
                     </LoadingComponent>
 
@@ -168,4 +142,17 @@ class AddressForm extends React.Component<AddressFormProps, AddressFormState> {
     }
 }
 
-export default AddressForm;
+const mapStateToProps = (state: RootState): AddressFormReduxStateProps => {
+    return {
+        ingredients: state.builder.ingredients,
+        price: state.builder.price,
+        submittingOrder: state.order.submittingOrder,
+        orderSubmissionError: state.order.orderSubmissionError
+    };
+}
+
+const mapDispatchToProps: AddressFormReduxDispatchProps = {
+    submitOrder: (order: OrderData) => submitOrder(order)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddressForm);

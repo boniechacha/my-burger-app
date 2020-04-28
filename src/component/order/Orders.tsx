@@ -1,41 +1,27 @@
-import React, {ReactPropTypes} from "react";
+import React from "react";
 import CSS from './Orders.module.css'
 import OrderAxios from "../../service/order-axios";
 import {Order} from "../../domain/Order";
 import OrderComponent from "./OrderComponent";
 import ErrorWrapper from "../util/error/ErrorWrapper";
 import LoadingComponent from "../util/spinner/LoadingComponent";
-
-type OrdersState = { orders: Order[], error: string, loading: boolean }
-
-interface OrdersProps extends ReactPropTypes {
-}
+import {OrdersProps, OrdersReduxDispatchProps, OrdersReduxStateProps, OrdersState} from "./OrdersTypes";
+import {RootState} from "../state/reducer";
+import {fetchOrders} from "../state/order/OrderAction";
+import {connect} from "react-redux";
 
 class Orders extends React.Component<OrdersProps, OrdersState> {
 
-    state = {
-        orders: [] as Order[],
-        error: '',
-        loading: false
-    }
-
     componentDidMount() {
-        this.setState({loading: true, error: ''})
-        OrderAxios.get('/order.json')
-            .then(response => {
-                const orders = Object.keys(response.data).map(key => response.data[key] as Order)
-                this.setState({orders: orders, error: ''})
-            }).catch(error => {
-            this.setState({error: error})
-        }).finally(() => this.setState({loading: false}));
+       this.props.fetchOrders();
     }
 
     render() {
         return (
-            <LoadingComponent loading={this.state.loading}>
-                <ErrorWrapper error={this.state.error.toString()}>
+            <LoadingComponent loading={this.props.fetchingOrders}>
+                <ErrorWrapper error={this.props.ordersFetchingError}>
                     <div className={CSS.Orders}>
-                        {this.state.orders.map(order => <OrderComponent key={order.id} order={order}/>)}
+                        {this.props.orders.map(order => <OrderComponent key={order.id} order={order}/>)}
                     </div>
                 </ErrorWrapper>
             </LoadingComponent>
@@ -43,4 +29,16 @@ class Orders extends React.Component<OrdersProps, OrdersState> {
     }
 }
 
-export default Orders;
+const mapStateToProps = (state: RootState): OrdersReduxStateProps => {
+    return {
+        orders: state.order.orders,
+        ordersFetchingError: state.order.ordersFetchingError,
+        fetchingOrders: state.order.fetchingOrders
+    }
+}
+
+const mapDispatchToProps: OrdersReduxDispatchProps = {
+    fetchOrders: () => fetchOrders()
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(Orders);

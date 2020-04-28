@@ -45,7 +45,7 @@ const BuildControlPanel: React.FC<BuildControlPanelProps> = (props) => {
 
             <button className={BuildControlPanelCSS.OrderButton}
                     disabled={countIngredients(props.ingredients) <= 0}
-                    onClick={() => props.onOrder()}>Order Now</button>
+                    onClick={() => props.onOrder()}>Checkout Now</button>
         </div>
     )
 }
